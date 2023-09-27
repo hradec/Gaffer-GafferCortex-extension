@@ -38,7 +38,7 @@ help:
 
 
 install: docker_build 
-build_all: install/$(GAFFER_VERSION)/lib/libGafferCortex.so install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so test
+build_all: $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so test
 
 # force the use of one shell for all shell lines, instead of one shell per line.
 .ONESHELL:
@@ -100,34 +100,34 @@ build/dependencies/$(GAFFER_VERSION)/.done:
 CXXSTD=$(shell curl -L 'https://raw.githubusercontent.com/GafferHQ/gaffer/$(GAFFER_VERSION)/SConstruct' 2>/dev/null | grep CXXSTD -A 2 | grep minimum -A1 | tail -1 | awk -F'"' '{print $$2}')
 
 # build GafferCortex using the downloaded GafferHQ binary
-install/$(GAFFER_VERSION)/lib/libGafferCortex.so: build/dependencies/$(GAFFER_VERSION)/.done $(GAFFER_CORTEX_SRC)
-	mkdir -p install/$(GAFFER_VERSION)/lib
+$(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so: build/dependencies/$(GAFFER_VERSION)/.done $(GAFFER_CORTEX_SRC)
+	mkdir -p $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib
 	g++ --shared -fPIC -std=$(CXXSTD) \
-		-I./include/ \
-		-I./build/dependencies/$(GAFFER_VERSION)/include/ \
-		-I./build/dependencies/$(GAFFER_VERSION)/include/Imath \
-		-L./build/dependencies/$(GAFFER_VERSION)/lib/ \
+		-I$(ROOT_DIR)/include/ \
+		-I$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/include/ \
+		-I$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/include/Imath \
+		-L$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/lib/ \
 		-lGafferBindings \
 		-lGafferDispatch \
 		$(GAFFER_CORTEX_SRC) -o $@ && \
-	mkdir -p install/$(GAFFER_VERSION)/include/ && \
-	cp -rfuv include/* install/$(GAFFER_VERSION)/include/
+	mkdir -p $(ROOT_DIR)/install/$(GAFFER_VERSION)/include/ && \
+	cp -rfuv include/* $(ROOT_DIR)/install/$(GAFFER_VERSION)/include/
 
 # build GafferCortex python module using the downloaded GafferHQ binary
-install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so: install/$(GAFFER_VERSION)/lib/libGafferCortex.so $(GAFFER_CORTEX_MODULE_SRC)
-	mkdir -p install/$(GAFFER_VERSION)/python/GafferCortex
+$(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so: $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so $(GAFFER_CORTEX_MODULE_SRC)
+	mkdir -p $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex
 	g++ --shared -fPIC -std=$(CXXSTD) \
-		-I./include/ \
-		-I./build/dependencies/$(GAFFER_VERSION)/include/ \
-		-I./build/dependencies/$(GAFFER_VERSION)/include/Imath \
-		-I./build/dependencies/$(GAFFER_VERSION)/include/python3.7m \
-		-L./build/dependencies/$(GAFFER_VERSION)/lib/ \
-		-L./install/$(GAFFER_VERSION)/lib/ \
+		-I$(ROOT_DIR)/include/ \
+		-I$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/include/ \
+		-I$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/include/Imath \
+		-I$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/include/python3.7m \
+		-L$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/lib/ \
+		-L$(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/ \
 		-lGafferBindings \
 		-lGafferCortex \
 		-lGafferDispatch \
 		$(GAFFER_CORTEX_MODULE_SRC) -o $@ && \
-	cp -rfuv python/* install/$(GAFFER_VERSION)/python/
+	cp -rfuv python/* $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/
 
 # run the downloaded Gaffer with the just built GafferCortex setup as extension
 run: 
@@ -139,7 +139,7 @@ run:
 	rm -rf /tmp/home
 
 # run the GafferCortex unit tests
-test: install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so
+test: $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so
 	mkdir -p /tmp/home
 	export HOME=/tmp/home
 	export GAFFER_EXTENSION_PATHS=$(ROOT_DIR)/install/$(GAFFER_VERSION)
