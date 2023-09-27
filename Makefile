@@ -59,8 +59,8 @@ docker_build:
 		-v $(ROOT_DIR)/:$(ROOT_DIR)/:shared \
 		$(DOCKER_IMAGE) \
 		/bin/bash -c "\
-			groupadd -g $(GID) $(GROUP)
-			useradd -l -u $(UID) -g $(GID) $(USER) && \
+			groupadd -g $(GID) $(GROUP) || true ; \
+			useradd -l -u $(UID) -g $(GID) $(USER) || true ; \
 			cd $(ROOT_DIR)/ && \
 			runuser $(USER) -c 'make \
 				GAFFER_VERSION=$(GAFFER_VERSION) \
