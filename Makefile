@@ -45,6 +45,7 @@ build_all: install/$(GAFFER_VERSION)/lib/libGafferCortex.so install/$(GAFFER_VER
 
 # run this makefile in the same docker container used to build Gaffer on github
 # but as the current user
+USER:=$(shell id -u -n)
 UID:=$(shell id -u ${USER})
 GID:=$(shell id -g ${USER})
 GROUP:=$(shell id -g -n ${USER})
