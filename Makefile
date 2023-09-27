@@ -52,15 +52,18 @@ CORES:=$(shell grep MHz /proc/cpuinfo  | wc -l)
 docker_build:
 	docker pull $(DOCKER_IMAGE)
 	docker rm -f gafferCortexBuild 2>/dev/null
+	extra=" groupadd -g $(GID) $(GROUP) && useradd -l -u $(UID) -g $(GID) $(USER) && "
+	if [ "$$USER" == "" ] ; then
+		extra=""
+	fi
 	docker run \
 		--name gafferCortexBuild \
 		--rm \
 		--privileged=true \
-		-v $(ROOT_DIR)/:$(ROOT_DIR)/:shared \
+		-v $(ROOT_DIR)/:$(ROOT_DIR)/ \
 		$(DOCKER_IMAGE) \
 		/bin/bash -c "\
-			groupadd -g $(GID) $(GROUP) || true ; \
-			useradd -l -u $(UID) -g $(GID) $(USER) || true ; \
+			$$extra \
 			cd $(ROOT_DIR)/ && \
 			runuser $(USER) -c 'make \
 				GAFFER_VERSION=$(GAFFER_VERSION) \
