@@ -37,7 +37,7 @@ help:
 	@echo ""
 
 
-install: docker_build 
+install: docker_build build_all
 build_all: $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so test
 
 # force the use of one shell for all shell lines, instead of one shell per line.
@@ -90,9 +90,9 @@ update:
 	rm -rf /tmp/GafferHQ-git/
 
 # download GAFFER_VERSION binary from GafferHQ
-build/dependencies/$(GAFFER_VERSION)/.done:
-	mkdir -p build/dependencies/$(GAFFER_VERSION)/
-	cd build/dependencies/$(GAFFER_VERSION)/
+$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/.done:
+	mkdir -p $(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/
+	cd $(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/
 	curl -L https://github.com/GafferHQ/gaffer/releases/download/$(GAFFER_VERSION)/gaffer-$(GAFFER_VERSION)-linux.tar.gz | tar xzf - --strip-components=1  && \
 	touch ./.done
 
@@ -100,7 +100,7 @@ build/dependencies/$(GAFFER_VERSION)/.done:
 CXXSTD=$(shell curl -L 'https://raw.githubusercontent.com/GafferHQ/gaffer/$(GAFFER_VERSION)/SConstruct' 2>/dev/null | grep CXXSTD -A 2 | grep minimum -A1 | tail -1 | awk -F'"' '{print $$2}')
 
 # build GafferCortex using the downloaded GafferHQ binary
-$(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so: build/dependencies/$(GAFFER_VERSION)/.done $(GAFFER_CORTEX_SRC)
+$(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so: $(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/.done $(GAFFER_CORTEX_SRC)
 	mkdir -p $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib
 	g++ --shared -fPIC -std=$(CXXSTD) \
 		-I$(ROOT_DIR)/include/ \
@@ -145,11 +145,11 @@ test: $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so
 	export GAFFER_EXTENSION_PATHS=$(ROOT_DIR)/install/$(GAFFER_VERSION)
 	export PATH=$(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/bin/:$(PATH)
 	Xvfb :99 -screen 0 1280x1024x24 & export DISPLAY=:99
-	cp -rfuv ./python/GafferCortexTest ./build/dependencies/$(GAFFER_VERSION)/python/ && \
+	cp -rfuv $(ROOT_DIR)/python/GafferCortexTest $(ROOT_DIR)build/dependencies/$(GAFFER_VERSION)/python/ && \
 	gaffer test GafferCortexTest && \
 	gaffer test GafferCortexUITest && \
 	rm -rf /tmp/home
-	rm -rf ./build/dependencies/$(GAFFER_VERSION)/python/GafferCortexTest
+	rm -rf $(ROOT_DIR)/build/dependencies/$(GAFFER_VERSION)/python/GafferCortexTest
 	pkill -fc -9 Xvfb..99
 
 clean:
