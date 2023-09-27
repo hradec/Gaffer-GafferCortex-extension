@@ -37,7 +37,7 @@ help:
 	@echo ""
 
 
-install: docker_build build_all
+install: docker_build
 build_all: $(ROOT_DIR)/install/$(GAFFER_VERSION)/lib/libGafferCortex.so $(ROOT_DIR)/install/$(GAFFER_VERSION)/python/GafferCortex/_GafferCortex.so test
 
 # force the use of one shell for all shell lines, instead of one shell per line.
