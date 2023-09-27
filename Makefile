@@ -52,9 +52,9 @@ CORES:=$(shell grep MHz /proc/cpuinfo  | wc -l)
 docker_build:
 	docker pull $(DOCKER_IMAGE)
 	docker rm -f gafferCortexBuild 2>/dev/null
-	extra=" groupadd -g $(GID) $(GROUP) && useradd -l -u $(UID) -g $(GID) $(USER) && "
-	if [ "$$USER" == "" ] ; then
-		extra=""
+	extra=""
+	if [ "$(USER)" != "root" ] ; then
+		extra=" groupadd -g $(GID) $(GROUP) && useradd -l -u $(UID) -g $(GID) $(USER) && "
 	fi
 	docker run \
 		--name gafferCortexBuild \
